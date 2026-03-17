@@ -1,8 +1,10 @@
+import { Service } from "diod";
 /* eslint-disable @typescript-eslint/ban-types,no-console */
 import { DomainEvent } from "../../domain/event/DomainEvent";
 import { DomainEventSubscriber } from "../../domain/event/DomainEventSubscriber";
 import { EventBus } from "../../domain/event/EventBus";
 
+@Service()
 export class InMemoryEventBus implements EventBus {
 	private readonly subscriptions: Map<string, { subscriber: Function; name: string }[]> = new Map();
 

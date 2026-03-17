@@ -12,11 +12,14 @@ import { UserFinder } from "../../../../contexts/mooc/users/domain/UserFinder";
 import { MySqlUserRepository } from "../../../../contexts/mooc/users/infrastructure/MySqlUserRepository";
 import { InMemoryEventBus } from "../../../../contexts/shared/infrastructure/domain_event/InMemoryEventBus";
 import { MariaDBConnection } from "../../../../contexts/shared/infrastructure/MariaDBConnection";
+import { container } from "../../../../contexts/shared/infrastructure/dependency-injection/diod.config";
 
 const mariaDBConnection = new MariaDBConnection();
 
 const mySqlUserRepository = new MySqlUserRepository(mariaDBConnection);
 const userFinder = new UserFinder(mySqlUserRepository);
+
+const completer = container.get(UserCourseProgressCompleter);
 
 const completer = new UserCourseProgressCompleter(
 	new InMemoryEventBus([

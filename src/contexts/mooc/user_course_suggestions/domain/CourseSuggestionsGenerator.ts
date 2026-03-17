@@ -1,6 +1,8 @@
 import { CourseSuggestion } from "./CourseSuggestion";
 import { UserCourseSuggestions } from "./UserCourseSuggestions";
 
-export interface CourseSuggestionsGenerator {
-	generate(userCourseSuggestions: UserCourseSuggestions): Promise<CourseSuggestion[]>;
+export abstract class CourseSuggestionsGenerator {
+	abstract generate(
+		userCourseSuggestions: UserCourseSuggestions,
+	): Promise<CourseSuggestion[]>;
 }
