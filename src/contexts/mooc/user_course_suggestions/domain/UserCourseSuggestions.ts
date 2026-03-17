@@ -4,14 +4,14 @@ import { UserCourseSuggestionsGenerated } from "./UserCourseSuggestionsGenerated
 
 export type UserCourseSuggestionsPrimitives = {
 	userId: string;
-	completedCourses: string[];
+	completedCourseIds: string[];
 	suggestions: CourseSuggestionPrimitives[];
 };
 
 export class UserCourseSuggestions extends AggregateRoot {
 	constructor(
 		public readonly userId: string,
-		public completedCourses: string[],
+		public completedCourseIds: string[],
 		public suggestions: CourseSuggestion[],
 	) {
 		super();
@@ -20,8 +20,8 @@ export class UserCourseSuggestions extends AggregateRoot {
 	static fromPrimitives(primitives: UserCourseSuggestionsPrimitives): UserCourseSuggestions {
 		return new UserCourseSuggestions(
 			primitives.userId,
-			primitives.completedCourses,
-			primitives.suggestions.map((suggestions) => CourseSuggestion.fromPrimitives(suggestions)),
+			Array.isArray(primitives.completedCourseIds) ? primitives.completedCourseIds : [],
+			primitives.suggestions.map((s) => CourseSuggestion.fromPrimitives(s)),
 		);
 	}
 
@@ -29,8 +29,17 @@ export class UserCourseSuggestions extends AggregateRoot {
 		return new UserCourseSuggestions(userId, [], []);
 	}
 
-	addCompletedCourse(courseName: string): void {
-		this.completedCourses.push(courseName);
+	addCompletedCourse(courseId: string): void {
+		this.completedCourseIds.push(courseId);
+	}
+
+	hasCompleted(courseId: string): boolean {
+		return this.completedCourseIds.includes(courseId);
+	}
+
+	/** @deprecated Use completedCourseIds; kept for legacy generators (OpenAI/Mistral) */
+	get completedCourses(): string[] {
+		return [];
 	}
 
 	updateSuggestions(suggestions: CourseSuggestion[]): void {
@@ -47,12 +56,8 @@ export class UserCourseSuggestions extends AggregateRoot {
 	toPrimitives(): UserCourseSuggestionsPrimitives {
 		return {
 			userId: this.userId,
-			completedCourses: this.completedCourses,
+			completedCourseIds: this.completedCourseIds,
 			suggestions: this.suggestions.map((suggestion) => suggestion.toPrimitives()),
 		};
-	}
-
-	hasCompleted(courseName: string): boolean {
-		return this.completedCourses.includes(courseName);
 	}
 }

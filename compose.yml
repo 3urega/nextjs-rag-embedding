@@ -1,5 +1,5 @@
 services:
-  06_2_ia_good_practices_mariadb:
+  eurega_rag_mariadb:
     image: mariadb:11
     restart: always
     environment:
@@ -14,14 +14,14 @@ services:
       - db_data:/var/lib/mysql
       - ./databases/codely.sql:/docker-entrypoint-initdb.d/init.sql
 
-  06_2_ia_good_practices_ollama:
+  eurega_rag_ollama:
     image: ollama/ollama
     volumes:
       - ~/.ollama:/root/.ollama
     ports:
       - "11434:11434"
 
-  poc_postgres_pgvector:
+  eurega_rag_postgres_pgvector:
     image: pgvector/pgvector:0.7.4-pg16
     restart: always
 
@@ -32,8 +32,9 @@ services:
     ports:
       - "5432:5432"
     volumes:
-      - db_data:/var/lib/postgresql/data
+      - pg_data:/var/lib/postgresql/data
       - ./databases:/docker-entrypoint-initdb.d
 
 volumes:
   db_data:
+  pg_data:

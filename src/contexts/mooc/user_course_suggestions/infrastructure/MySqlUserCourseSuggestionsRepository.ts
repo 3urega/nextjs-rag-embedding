@@ -20,7 +20,7 @@ export class MySqlUserCourseSuggestionsRepository implements UserCourseSuggestio
 			INSERT INTO mooc__user_course_suggestions (user_id, completed_courses, suggested_courses)
 			VALUES (
 				'${primitives.userId}',
-				'${JSON.stringify(primitives.completedCourses)}',
+				'${JSON.stringify(primitives.completedCourseIds)}',
 				'${JSON.stringify(primitives.suggestions)}'
 			)
 			ON DUPLICATE KEY UPDATE
@@ -45,13 +45,13 @@ export class MySqlUserCourseSuggestionsRepository implements UserCourseSuggestio
 			return null;
 		}
 
-		const completedCourses = JSON.parse(result.completed_courses) as string[];
+		const completedCourseIds = JSON.parse(result.completed_courses) as string[];
 		const suggestions = JSON.parse(result.suggested_courses) as CourseSuggestionPrimitives[];
 
 		return UserCourseSuggestions.fromPrimitives({
 			userId: result.user_id,
-			completedCourses,
-			suggestions: suggestions.map((primitives) => CourseSuggestion.fromPrimitives(primitives)),
+			completedCourseIds,
+			suggestions: suggestions.map((s) => CourseSuggestion.fromPrimitives(s)),
 		});
 	}
 }

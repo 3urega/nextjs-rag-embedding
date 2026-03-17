@@ -1,3 +1,4 @@
+import "reflect-metadata";
 import { Service } from "diod";
 
 import { EventBus } from "../../../../shared/domain/event/EventBus";

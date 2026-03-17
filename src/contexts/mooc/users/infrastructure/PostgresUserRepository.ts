@@ -16,10 +16,7 @@ type DatabaseUserRow = {
 };
 
 @Service()
-export class PostgresUserRepository
-	extends PostgresRepository<User>
-	implements UserRepository
-{
+export class PostgresUserRepository extends PostgresRepository<User> implements UserRepository {
 	async save(user: User): Promise<void> {
 		const userPrimitives = user.toPrimitives();
 

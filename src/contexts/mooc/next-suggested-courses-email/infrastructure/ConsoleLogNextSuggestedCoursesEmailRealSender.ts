@@ -55,9 +55,7 @@ Lista de cursos sugeridos (cada curso se presenta con su nombre, resumen y motiv
 		]);
 
 		const message: AIMessage = await chain.invoke({
-			suggested_courses: email.suggestions
-				.map(this.formatSuggestion)
-				.join("\n\n"),
+			suggested_courses: email.suggestions.map(this.formatSuggestion).join("\n\n"),
 			user_name: email.userName,
 		});
 

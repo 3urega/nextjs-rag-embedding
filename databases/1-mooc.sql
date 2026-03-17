@@ -1,3 +1,14 @@
+/*
+Recomendación de bases de datos (según el contexto de RAG local + este esquema):
+
+- PostgreSQL + pgvector (principal): datos relacionales + búsqueda vectorial en el mismo sitio.
+  - Este esquema ya lo asume (ver mooc.courses.embedding vector(768)).
+- Redis (opcional): sesiones de chat, caché de retrieval/respuestas, rate limiting.
+- OpenSearch/Elasticsearch (opcional): si necesitas ranking híbrido serio (keyword/BM25 + vector).
+- ClickHouse (opcional): analítica/eventos a gran escala; si no, Postgres vale para logs.
+- Object Storage (S3/MinIO) (opcional): binarios (imágenes/PDFs) y fuentes originales; en Postgres solo referencias/metadata.
+*/
+
 CREATE SCHEMA mooc;
 
 CREATE TABLE mooc.users (

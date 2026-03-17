@@ -1,16 +1,56 @@
+/* eslint-disable camelcase */
+import "reflect-metadata";
+
 import { Params } from "next/dist/shared/lib/router/utils/route-matcher";
 import { NextResponse } from "next/server";
+import { validate as validateUuid } from "uuid";
 
 import { UserFinder } from "../../../../../contexts/mooc/users/application/find/UserFinder";
-import { MySqlUserRepository } from "../../../../../contexts/mooc/users/infrastructure/MySqlUserRepository";
-import { MariaDBConnection } from "../../../../../contexts/shared/infrastructure/MariaDBConnection";
+import { UserRegistrar } from "../../../../../contexts/mooc/users/application/registrar/UserRegistrar";
+import { UserDoesNotExist } from "../../../../../contexts/mooc/users/domain/UserDoesNotExist";
+import { container } from "../../../../../contexts/shared/infrastructure/dependency-injection/diod.config";
+import { executeWithErrorHandling } from "../../../../../contexts/shared/infrastructure/http/executeWithErrorHandling";
+import { HttpNextResponse } from "../../../../../contexts/shared/infrastructure/http/HttpNextResponse";
 
-const finder = new UserFinder(new MySqlUserRepository(new MariaDBConnection()));
+export async function GET(
+	_request: Request,
+	context: { params: Params },
+): Promise<NextResponse> {
+	return executeWithErrorHandling(
+		async () => {
+			const finder = container.get(UserFinder);
 
-export async function GET(_request: Request, context: { params: Params }): Promise<NextResponse> {
-	const userId = context.params.user_id as string;
+			const userId = context.params.user_id as string;
 
-	const users = await finder.find(userId);
+			const user = await finder.find(userId);
 
-	return NextResponse.json(users.toPrimitives());
+			return NextResponse.json(user.toPrimitives());
+		},
+		(error: UserDoesNotExist) => {
+			return HttpNextResponse.domainError(error, 404);
+		},
+	);
+}
+
+export async function PUT(
+	request: Request,
+	context: { params: Params },
+): Promise<NextResponse> {
+	return executeWithErrorHandling(async () => {
+		const registrar = container.get(UserRegistrar);
+
+		const id = context.params.user_id as string;
+		if (!validateUuid(id)) {
+			return HttpNextResponse.badRequest("user_id must be a valid UUID");
+		}
+		const { name, email, profile_picture } = (await request.json()) as {
+			name: string;
+			email: string;
+			profile_picture: string;
+		};
+
+		await registrar.registrar(id, name, email, profile_picture);
+
+		return HttpNextResponse.created();
+	});
 }

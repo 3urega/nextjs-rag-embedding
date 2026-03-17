@@ -7,9 +7,7 @@ export abstract class DomainError extends Error {
 		description: string;
 		data: Record<string, unknown>;
 	} {
-		const props = Object.entries(this).filter(
-			([key, _]) => key !== "type" && key !== "message",
-		);
+		const props = Object.entries(this).filter(([key, _]) => key !== "type" && key !== "message");
 
 		return {
 			type: this.type,

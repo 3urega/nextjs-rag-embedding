@@ -1,9 +1,11 @@
-import { UserFinder } from "../../domain/UserFinder";
 import { UserRepository } from "../../domain/UserRepository";
+import { Service } from "diod";
+import { DomainUserFinder } from "../../domain/DomainUserFinder";
 
+@Service()
 export class UserCourseSuggestionsUpdater {
 	constructor(
-		private readonly finder: UserFinder,
+		private readonly finder: DomainUserFinder,
 		private readonly repository: UserRepository,
 	) {}
 

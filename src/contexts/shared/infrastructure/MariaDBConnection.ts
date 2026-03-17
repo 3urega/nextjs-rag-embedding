@@ -2,7 +2,7 @@ import { createPool, Pool } from "mariadb";
 
 interface MinimalConn {
 	query: (sql: string) => Promise<unknown>;
-	end: () => Promise<void>;
+	release: () => void;
 }
 
 export class MariaDBConnection {
@@ -30,7 +30,7 @@ export class MariaDBConnection {
 			return rows[0] ?? null;
 		} finally {
 			if (conn) {
-				await conn.end();
+				conn.release();
 			}
 		}
 	}
@@ -43,7 +43,7 @@ export class MariaDBConnection {
 			return (await conn.query(query)) as T[];
 		} finally {
 			if (conn) {
-				await conn.end();
+				conn.release();
 			}
 		}
 	}
@@ -55,7 +55,7 @@ export class MariaDBConnection {
 			await conn.query(query);
 		} finally {
 			if (conn) {
-				await conn.end();
+				conn.release();
 			}
 		}
 	}

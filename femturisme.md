@@ -208,6 +208,26 @@ Ollama
 Postgres + pgvector
 No MCP. No agentes complejos.
 
+## Bases de datos recomendadas (según este contexto)
+
+Partiendo del diseño actual y del esquema que ya tenéis (ver `databases/1-mooc.sql`, donde `mooc.courses.embedding` es `vector(768)`), mi recomendación es:
+
+- **PostgreSQL + pgvector (recomendación principal)**: una sola base para **datos relacionales** + **búsqueda vectorial**. Es exactamente el enfoque que encaja con el RAG local simple y con el modelo de tabla `plans`/`courses` que ya planteas.  
+  - **Vector DB**: `embedding vector(768)` y consultas tipo `ORDER BY embedding <=> $query_embedding LIMIT k`.
+  - **Metadata/filtros**: `location`, `tags`, `children_friendly`, etc. (filtros SQL + ranking).
+  - **JSONB**: útil para campos flexibles (`tags`, `categories`, etc.).
+
+- **Redis (opcional, pero muy útil)**: para **sesiones de chat**, rate limiting, y **cache** de retrieval/respuestas (reduce latencia y coste de inferencia local).
+
+- **OpenSearch/Elasticsearch (opcional, si quieres ranking híbrido serio)**: si el contenido crece mucho y quieres combinar **keyword search** (BM25) + **vector search** con relevancia más fina. Si el tamaño es moderado, Postgres puede bastar.
+
+- **ClickHouse / Postgres (analítica) (opcional)**: para métricas y análisis de producto (preguntas, chunks usados, feedback, conversión). Si no necesitas analítica pesada, guarda logs en Postgres.
+
+- **Object Storage (S3/MinIO) (opcional)**: si además del texto vas a guardar **imágenes/PDFs** o fuentes originales de contenido, mejor fuera de la BD; en Postgres guardas referencias y metadata.
+
+### Nota práctica
+Si el objetivo es simplicidad y “time-to-value”: **Postgres + pgvector + Redis** suele ser el punto dulce. El resto se añade cuando el volumen o los requisitos lo piden.
+
 1️⃣ Modelo de datos recomendado
 Tabla principal: plans
 plans

@@ -9,11 +9,11 @@ import { ChatOllama } from "@langchain/ollama";
 import { Service } from "diod";
 import { z } from "zod";
 
-import { CourseSuggestionsGenerator } from "../domain/CourseSuggestionsGenerator";
 import { Course } from "../../courses/domain/Course";
 import { CourseId } from "../../courses/domain/CourseId";
 import { CourseRepository } from "../../courses/domain/CourseRepository";
 import { CourseSuggestion } from "../domain/CourseSuggestion";
+import { CourseSuggestionsGenerator } from "../domain/CourseSuggestionsGenerator";
 import { UserCourseSuggestions } from "../domain/UserCourseSuggestions";
 
 /**
@@ -37,31 +37,23 @@ import { UserCourseSuggestions } from "../domain/UserCourseSuggestions";
  *   - `RunnableSequence`: pipeline que encadena pasos (prompt -> modelo -> parser).
  */
 @Service()
-export class OllamaLlama31CourseSuggestionsGenerator
-	implements CourseSuggestionsGenerator
-{
+export class OllamaLlama31CourseSuggestionsGenerator implements CourseSuggestionsGenerator {
 	constructor(private readonly courseRepository: CourseRepository) {}
 
-	async generate(
-		userCourseSuggestions: UserCourseSuggestions,
-	): Promise<CourseSuggestion[]> {
+	async generate(userCourseSuggestions: UserCourseSuggestions): Promise<CourseSuggestion[]> {
 		// El agregado de dominio se serializa a "primitives" para trabajar con IDs/string
 		// sin arrastrar objetos ricos por la capa de infraestructura.
 		const primitives = userCourseSuggestions.toPrimitives();
 
-		const completedCourseIds = primitives.completedCourseIds.map(
-			(id) => new CourseId(id),
-		);
+		const completedCourseIds = (primitives.completedCourseIds ?? []).map((id) => new CourseId(id));
 
 		// Fuente de candidatos: buscamos cursos similares a lo ya completado.
 		// Importante: el LLM solo "elige" entre estos; aquí está el recorte de universo.
-		const similarCourses =
-			await this.courseRepository.searchSimilar(completedCourseIds);
+		const similarCourses = await this.courseRepository.searchSimilar(completedCourseIds);
 
 		// Contexto adicional para el modelo: la lista de cursos completados (nombre/resumen/categorías)
 		// se incluye en el prompt para justificar y evitar recomendar repetidos.
-		const completedCourses =
-			await this.courseRepository.searchByIds(completedCourseIds);
+		const completedCourses = await this.courseRepository.searchByIds(completedCourseIds);
 
 		/**
 		 * Structured output en LangChain:
@@ -79,12 +71,8 @@ export class OllamaLlama31CourseSuggestionsGenerator
 			z.array(
 				z.object({
 					courseId: z.string().describe("Id del curso sugerido."),
-					courseName: z
-						.string()
-						.describe("Nombre del curso sugerido."),
-					reason: z
-						.string()
-						.describe("Motivo por el que se sugiere el curso."),
+					courseName: z.string().describe("Nombre del curso sugerido."),
+					reason: z.string().describe("Motivo por el que se sugiere el curso."),
 				}),
 			),
 		);
@@ -155,20 +143,15 @@ Cursos que el usuario ya ha completado:
 		// Invocamos la cadena con las variables del prompt.
 		// `formatCourse` aplana el objeto `Course` a texto legible para el LLM.
 		const suggestions = await chain.invoke({
-			available_courses: similarCourses
-				.map(this.formatCourse)
-				.join("\n\n"),
-			completed_courses: completedCourses
-				.map(this.formatCourse)
-				.join("\n\n"),
+			available_courses: similarCourses.map(this.formatCourse).join("\n\n"),
+			completed_courses: completedCourses.map(this.formatCourse).join("\n\n"),
 			format_instructions: outputParser.getFormatInstructions(),
 		});
 
 		// Convertimos la estructura parseada (JSON validado) a objetos de dominio.
 		// El dominio decide qué guarda exactamente como "sugerencia" (aquí: id + razón).
 		return suggestions.map(
-			(suggestion) =>
-				new CourseSuggestion(suggestion.courseId, suggestion.reason),
+			(suggestion) => new CourseSuggestion(suggestion.courseId, suggestion.reason),
 		);
 	}
 

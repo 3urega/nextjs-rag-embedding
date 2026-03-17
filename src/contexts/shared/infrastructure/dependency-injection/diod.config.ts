@@ -1,47 +1,51 @@
+import "reflect-metadata";
 import { ContainerBuilder } from "diod";
 
+import { UserCourseProgressCompleter } from "../../../../contexts/mooc/user_course_progress/application/complete/UserCourseProgressCompleter";
+import { GenerateUserCourseSuggestionsOnUserCourseProgressCompleted } from "../../../../contexts/mooc/user_course_suggestions/application/generate/GenerateUserCourseSuggestionsOnUserCourseProgressCompleted";
+import { UserCourseSuggestionsGenerator } from "../../../../contexts/mooc/user_course_suggestions/application/generate/UserCourseSuggestionsGenerator";
+import { CourseSuggestionsGenerator } from "../../../../contexts/mooc/user_course_suggestions/domain/CourseSuggestionsGenerator";
+import { UserCourseSuggestionsRepository } from "../../../../contexts/mooc/user_course_suggestions/domain/UserCourseSuggestionsRepository";
+import { OllamaLlama31CourseSuggestionsGenerator } from "../../../../contexts/mooc/user_course_suggestions/infrastructure/OllamaLlama31CourseSuggestionsGenerator";
+import { PostgresUserCourseSuggestionsRepository } from "../../../../contexts/mooc/user_course_suggestions/infrastructure/PostgresUserCourseSuggestionsRepository";
+import { UpdateUserCourseSuggestionsOnUserCourseSuggestionsGenerated } from "../../../../contexts/mooc/users/application/update_course_suggestions/UpdateUserCourseSuggestionsOnUserCourseSuggestionsGenerated";
+import { UserCourseSuggestionsUpdater } from "../../../../contexts/mooc/users/application/update_course_suggestions/UserCourseSuggestionsUpdater";
+import { DomainUserFinder } from "../../../../contexts/mooc/users/domain/DomainUserFinder";
+import { UserRepository } from "../../../../contexts/mooc/users/domain/UserRepository";
+import { PostgresUserRepository } from "../../../../contexts/mooc/users/infrastructure/PostgresUserRepository";
 import { CoursesByIdsSearcher } from "../../../mooc/courses/application/search-by-ids/CoursesByIdsSearcher";
 import { CourseRepository } from "../../../mooc/courses/domain/CourseRepository";
 import { PostgresCourseRepository } from "../../../mooc/courses/infrastructure/PostgresCourseRepository";
 import { NextSuggestedCoursesEmailSender } from "../../../mooc/next-suggested-courses-email/application/send-next-suggested-courses-email/NextSuggestedCoursesEmailSender";
+import { PlanRepository } from "../../../femturisme/plans/domain/PlanRepository";
+import { PostgresPlanRepository } from "../../../femturisme/plans/infrastructure/PostgresPlanRepository";
 import { NextSuggestedCoursesEmailRealSender } from "../../../mooc/next-suggested-courses-email/domain/NextSuggestedCoursesEmailRealSender";
 import { ConsoleLogNextSuggestedCoursesEmailRealSender } from "../../../mooc/next-suggested-courses-email/infrastructure/ConsoleLogNextSuggestedCoursesEmailRealSender";
-import { UserCourseProgressCompleter } from "../../../../contexts/mooc/user_course_progress/application/complete/UserCourseProgressCompleter";
-import { GenerateUserCourseSuggestionsOnUserCourseProgressCompleted } from "../../../../contexts/mooc/user_course_suggestions/application/generate/GenerateUserCourseSuggestionsOnUserCourseProgressCompleted";
-import { UserCourseSuggestionsGenerator } from "../../../../contexts/mooc/user_course_suggestions/application/generate/UserCourseSuggestionsGenerator";
-import { OllamaMistralCourseSuggestionsGenerator } from "../../../../contexts/mooc/user_course_suggestions/infrastructure/OllamaMistralCourseSuggestionsGenerator";
-import { MySqlUserCourseSuggestionsRepository } from "../../../../contexts/mooc/user_course_suggestions/infrastructure/MySqlUserCourseSuggestionsRepository";
 import { UserFinder } from "../../../mooc/users/application/find/UserFinder";
 import { UserRegistrar } from "../../../mooc/users/application/registrar/UserRegistrar";
+import { DomainEvent } from "../../domain/event/DomainEvent";
+import { DomainEventSubscriber } from "../../domain/event/DomainEventSubscriber";
 import { EventBus } from "../../domain/event/EventBus";
 import { InMemoryEventBus } from "../domain_event/InMemoryEventBus";
 import { PostgresConnection } from "../postgres/PostgresConnection";
-import { DomainUserFinder } from "../../../../contexts/mooc/users/domain/DomainUserFinder";
-import {OllamaLlama31CourseSuggestionsGenerator} from "../../../../contexts/mooc/user_course_suggestions/infrastructure/OllamaLlama31CourseSuggestionsGenerator";
-import { UpdateUserCourseSuggestionsOnUserCourseSuggestionsGenerated } from "../../../../contexts/mooc/users/application/update_course_suggestions/UpdateUserCourseSuggestionsOnUserCourseSuggestionsGenerated";
-import { UserCourseSuggestionsUpdater } from "../../../../contexts/mooc/users/application/update_course_suggestions/UserCourseSuggestionsUpdater";
-import { PostgresUserRepository } from "../../../../contexts/mooc/users/infrastructure/PostgresUserRepository";
-import { CourseSuggestionsGenerator } from "../../../../contexts/mooc/user_course_suggestions/domain/CourseSuggestionsGenerator";
-import { UserRepository } from "../../../../contexts/mooc/users/domain/UserRepository";
-import { UserCourseSuggestionsRepository } from "../../../../contexts/mooc/user_course_suggestions/domain/UserCourseSuggestionsRepository";
-import { PostgresUserCourseSuggestionsRepository } from "../../../../contexts/mooc/user_course_suggestions/infrastructure/PostgresUserCourseSuggestionsRepository";
+
 const builder = new ContainerBuilder();
 
 // Shared
 builder
 	.register(PostgresConnection)
 	.useFactory(() => {
-		return new PostgresConnection(
-			"localhost",
-			5432,
-			"codely",
-			"c0d3ly7v",
-			"postgres",
-		);
+		return new PostgresConnection("localhost", 5432, "codely", "c0d3ly7v", "postgres");
 	})
 	.asSingleton();
 
-builder.register(EventBus).use(InMemoryEventBus);
+builder.register(EventBus).useFactory(({ get, findTaggedServiceIdentifiers }) => {
+	return new InMemoryEventBus(() =>
+		findTaggedServiceIdentifiers("subscriber").map(
+			(id) => get(id) as DomainEventSubscriber<DomainEvent>,
+		),
+	);
+});
 
 // User
 builder.register(UserRepository).use(PostgresUserRepository);
@@ -58,12 +62,8 @@ builder
 builder.registerAndUse(UserCourseSuggestionsUpdater);
 
 // UserCourseSuggestions
-builder
-	.register(CourseSuggestionsGenerator)
-	.use(OllamaLlama31CourseSuggestionsGenerator);
-builder
-	.register(UserCourseSuggestionsRepository)
-	.use(PostgresUserCourseSuggestionsRepository);
+builder.register(CourseSuggestionsGenerator).use(OllamaLlama31CourseSuggestionsGenerator);
+builder.register(UserCourseSuggestionsRepository).use(PostgresUserCourseSuggestionsRepository);
 builder.registerAndUse(UserCourseSuggestionsGenerator);
 builder
 	.registerAndUse(GenerateUserCourseSuggestionsOnUserCourseProgressCompleted)
@@ -82,6 +82,10 @@ builder
 	.use(ConsoleLogNextSuggestedCoursesEmailRealSender);
 
 builder.registerAndUse(NextSuggestedCoursesEmailSender);
+
+// Femturisme (Plans)
+builder.register(PlanRepository).use(PostgresPlanRepository);
+builder.registerAndUse(PostgresPlanRepository);
 
 // Export container
 export const container = builder.build();

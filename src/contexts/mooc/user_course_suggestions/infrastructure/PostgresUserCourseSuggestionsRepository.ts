@@ -1,10 +1,8 @@
 import { Service } from "diod";
+
 import { PostgresRepository } from "../../../shared/infrastructure/postgres/PostgresRepository";
 import { UserId } from "../../users/domain/UserId";
-import {
-	CourseSuggestion,
-	CourseSuggestionPrimitives,
-} from "../domain/CourseSuggestion";
+import { CourseSuggestion, CourseSuggestionPrimitives } from "../domain/CourseSuggestion";
 import { UserCourseSuggestions } from "../domain/UserCourseSuggestions";
 import { UserCourseSuggestionsRepository } from "../domain/UserCourseSuggestionsRepository";
 
@@ -43,9 +41,7 @@ export class PostgresUserCourseSuggestionsRepository
 		`;
 	}
 
-	protected toAggregate(
-		row: DatabaseUserCourseSuggestionsRow,
-	): UserCourseSuggestions {
+	protected toAggregate(row: DatabaseUserCourseSuggestionsRow): UserCourseSuggestions {
 		return UserCourseSuggestions.fromPrimitives({
 			userId: row.user_id,
 			completedCourseIds: row.completed_course_ids,

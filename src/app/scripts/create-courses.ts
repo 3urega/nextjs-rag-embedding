@@ -5,7 +5,6 @@ import { Course } from "../../contexts/mooc/courses/domain/Course";
 import { PostgresCourseRepository } from "../../contexts/mooc/courses/infrastructure/PostgresCourseRepository";
 import { container } from "../../contexts/shared/infrastructure/dependency-injection/diod.config";
 import { PostgresConnection } from "../../contexts/shared/infrastructure/postgres/PostgresConnection";
-
 import jsonCourses from "./courses.json";
 
 async function main(repository: PostgresCourseRepository): Promise<void> {

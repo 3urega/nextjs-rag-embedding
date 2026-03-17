@@ -35,8 +35,7 @@ export class PostgresCourseRepository
 
 	async save(course: Course): Promise<void> {
 		const userPrimitives = course.toPrimitives();
-		const embedding =
-			await this.generateCourseDocumentEmbedding(userPrimitives);
+		const embedding = await this.generateCourseDocumentEmbedding(userPrimitives);
 
 		await this.execute`
 			INSERT INTO mooc.courses (id, name, summary, categories, published_at, embedding)
@@ -110,23 +109,17 @@ export class PostgresCourseRepository
 		});
 	}
 
-	private async generateCourseDocumentEmbedding(
-		course: Primitives<Course>,
-	): Promise<string> {
-		const [vectorEmbedding] = await this.embeddingsGenerator.embedDocuments(
-			[this.serializeCourseForEmbedding(course)],
-		);
+	private async generateCourseDocumentEmbedding(course: Primitives<Course>): Promise<string> {
+		const [vectorEmbedding] = await this.embeddingsGenerator.embedDocuments([
+			this.serializeCourseForEmbedding(course),
+		]);
 
 		return JSON.stringify(vectorEmbedding);
 	}
 
-	private async generateCoursesQueryEmbeddings(
-		courses: Primitives<Course>[],
-	): Promise<string> {
+	private async generateCoursesQueryEmbeddings(courses: Primitives<Course>[]): Promise<string> {
 		const vectorEmbedding = await this.embeddingsGenerator.embedQuery(
-			courses
-				.map((course) => this.serializeCourseForEmbedding(course))
-				.join("\n"),
+			courses.map((course) => this.serializeCourseForEmbedding(course)).join("\n"),
 		);
 
 		return JSON.stringify(vectorEmbedding);

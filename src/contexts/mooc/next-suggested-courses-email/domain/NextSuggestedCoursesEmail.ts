@@ -22,10 +22,6 @@ export class NextSuggestedCoursesEmail extends AggregateRoot {
 			reason: string;
 		}[],
 	): NextSuggestedCoursesEmail {
-		return new NextSuggestedCoursesEmail(
-			emailAddress,
-			userName,
-			suggestions,
-		);
+		return new NextSuggestedCoursesEmail(emailAddress, userName, suggestions);
 	}
 }

@@ -1,7 +1,7 @@
 import { Service } from "diod";
 
 import { User } from "./User";
-import { UserDoesNotExistError } from "./UserDoesNotExistError";
+import { UserDoesNotExist } from "./UserDoesNotExist";
 import { UserId } from "./UserId";
 import { UserRepository } from "./UserRepository";
 
@@ -13,7 +13,7 @@ export class DomainUserFinder {
 		const user = await this.repository.search(new UserId(id));
 
 		if (user === null) {
-			throw new UserDoesNotExistError(id);
+			throw new UserDoesNotExist(id);
 		}
 
 		return user;
