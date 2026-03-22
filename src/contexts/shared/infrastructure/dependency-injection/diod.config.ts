@@ -19,6 +19,9 @@ import { PostgresCourseRepository } from "../../../mooc/courses/infrastructure/P
 import { NextSuggestedCoursesEmailSender } from "../../../mooc/next-suggested-courses-email/application/send-next-suggested-courses-email/NextSuggestedCoursesEmailSender";
 import { PlanRepository } from "../../../femturisme/plans/domain/PlanRepository";
 import { PostgresPlanRepository } from "../../../femturisme/plans/infrastructure/PostgresPlanRepository";
+import { PlanSuggestionsGenerator } from "../../../femturisme/plan_suggestions/domain/PlanSuggestionsGenerator";
+import { PlanSuggester } from "../../../femturisme/plan_suggestions/application/suggest/PlanSuggester";
+import { OllamaPlanSuggestionsGenerator } from "../../../femturisme/plan_suggestions/infrastructure/OllamaPlanSuggestionsGenerator";
 import { NextSuggestedCoursesEmailRealSender } from "../../../mooc/next-suggested-courses-email/domain/NextSuggestedCoursesEmailRealSender";
 import { ConsoleLogNextSuggestedCoursesEmailRealSender } from "../../../mooc/next-suggested-courses-email/infrastructure/ConsoleLogNextSuggestedCoursesEmailRealSender";
 import { UserFinder } from "../../../mooc/users/application/find/UserFinder";
@@ -86,6 +89,10 @@ builder.registerAndUse(NextSuggestedCoursesEmailSender);
 // Femturisme (Plans)
 builder.register(PlanRepository).use(PostgresPlanRepository);
 builder.registerAndUse(PostgresPlanRepository);
+
+// Femturisme (Plan Suggestions)
+builder.register(PlanSuggestionsGenerator).use(OllamaPlanSuggestionsGenerator);
+builder.registerAndUse(PlanSuggester);
 
 // Export container
 export const container = builder.build();

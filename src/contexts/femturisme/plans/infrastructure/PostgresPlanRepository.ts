@@ -34,6 +34,54 @@ export class PostgresPlanRepository implements PlanRepository {
 		});
 	}
 
+	async save(plan: Plan): Promise<void> {
+		const p = plan.toPrimitives();
+
+		await this.connection.sql`
+			INSERT INTO femturisme.plans (
+				id, title, description, location, url, tags,
+				children_friendly, vehicle_required, overnight_possible
+			)
+			VALUES (
+				${p.id},
+				${p.title},
+				${p.description},
+				${p.location},
+				${p.url},
+				${JSON.stringify(p.tags)}::jsonb,
+				${p.childrenFriendly},
+				${p.vehicleRequired},
+				${p.overnightPossible}
+			)
+			ON CONFLICT (id) DO UPDATE SET
+				title = EXCLUDED.title,
+				description = EXCLUDED.description,
+				location = EXCLUDED.location,
+				url = EXCLUDED.url,
+				tags = EXCLUDED.tags,
+				children_friendly = EXCLUDED.children_friendly,
+				vehicle_required = EXCLUDED.vehicle_required,
+				overnight_possible = EXCLUDED.overnight_possible,
+				updated_at = NOW();
+		`;
+
+		const chunks = this.buildStructuralChunks(p);
+
+		await this.connection.sql`
+			DELETE FROM femturisme.plan_chunks WHERE plan_id = ${p.id};
+		`;
+
+		for (let idx = 0; idx < chunks.length; idx++) {
+			const [vector] = await this.embeddings.embedDocuments([chunks[idx]]);
+			const chunkId = randomUUID();
+
+			await this.connection.sql`
+				INSERT INTO femturisme.plan_chunks (id, plan_id, chunk_index, content, embedding)
+				VALUES (${chunkId}, ${p.id}, ${idx}, ${chunks[idx]}, ${JSON.stringify(vector)});
+			`;
+		}
+	}
+
 	async search(id: PlanId): Promise<Plan | null> {
 		const rows = await this.connection.sql`
 			SELECT id, title, description, location, url, tags,
@@ -67,7 +115,12 @@ export class PostgresPlanRepository implements PlanRepository {
 	}
 
 	private toPlan(row: PlanRow): Plan {
-		const tags = Array.isArray(row.tags) ? row.tags : (row.tags as unknown as string[]);
+		const rawTags = row.tags;
+		const tags: string[] = Array.isArray(rawTags)
+			? rawTags
+			: typeof rawTags === "string"
+				? (JSON.parse(rawTags) as string[])
+				: [];
 		return Plan.fromPrimitives({
 			id: row.id,
 			title: row.title,
@@ -79,5 +132,41 @@ export class PostgresPlanRepository implements PlanRepository {
 			vehicleRequired: row.vehicle_required,
 			overnightPossible: row.overnight_possible,
 		});
+	}
+
+	private buildStructuralChunks(p: {
+		title: string;
+		description: string;
+		location: string | null;
+		tags: string[];
+		childrenFriendly: boolean | null;
+		vehicleRequired: boolean | null;
+		overnightPossible: boolean | null;
+	}): string[] {
+		const header = `Plan: ${p.title}\n`;
+		const chunks: string[] = [];
+
+		chunks.push(
+			[header, `Ubicación: ${p.location || "No especificada"}`, `Tags: ${(p.tags || []).join(", ")}`].join("\n"),
+		);
+
+		chunks.push(
+			[
+				header,
+				`Apto para familias con niños: ${this.formatBool(p.childrenFriendly)}`,
+				`Requiere coche: ${this.formatBool(p.vehicleRequired)}`,
+				`Posible pernoctar: ${this.formatBool(p.overnightPossible)}`,
+			].join("\n"),
+		);
+
+		chunks.push([header, `Descripción: ${p.description}`].join("\n"));
+
+		return chunks;
+	}
+
+	private formatBool(v: boolean | null): string {
+		if (v === true) return "sí";
+		if (v === false) return "no";
+		return "no especificado";
 	}
 }
