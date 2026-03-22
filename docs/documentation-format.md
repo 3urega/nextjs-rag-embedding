@@ -66,7 +66,6 @@ PostgreSQL with pgvector...
 
 - [Hexagonal Architecture convention](backend/hexagonal-architecture.md)
 - [Object Mothers convention](testing/object-mothers.md)
-- [PostgreSQL with pgvector convention](database/postgresql-pgvector.md)
 
 ## 🔗 Related agreements
 
