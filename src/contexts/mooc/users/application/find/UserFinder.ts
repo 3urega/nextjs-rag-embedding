@@ -1,8 +1,9 @@
+import { Service } from "diod";
+
 import { User } from "../../domain/User";
 import { UserDoesNotExist } from "../../domain/UserDoesNotExist";
 import { UserId } from "../../domain/UserId";
 import { UserRepository } from "../../domain/UserRepository";
-import { Service } from "diod";
 
 @Service()
 export class UserFinder {

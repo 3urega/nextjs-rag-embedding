@@ -1,13 +1,11 @@
-import postgres from "postgres";
 import { OllamaEmbeddings } from "@langchain/ollama";
 import { readFileSync } from "fs";
-import { fileURLToPath } from "url";
 import { dirname, join } from "path";
+import postgres from "postgres";
+import { fileURLToPath } from "url";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
-const courses = JSON.parse(
-	readFileSync(join(__dirname, "courses.json"), "utf-8")
-);
+const courses = JSON.parse(readFileSync(join(__dirname, "courses.json"), "utf-8"));
 
 const sql = postgres({
 	host: "localhost",

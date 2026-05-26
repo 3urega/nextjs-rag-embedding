@@ -1,5 +1,4 @@
 import { PlanSearchResult } from "../../plans/domain/PlanSearchResult";
-
 import { PlanSuggestion } from "./PlanSuggestion";
 
 export abstract class PlanSuggestionsGenerator {

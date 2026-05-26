@@ -1,6 +1,7 @@
 import { MariaDBConnection } from "../../../shared/infrastructure/MariaDBConnection";
 import { User } from "../domain/User";
 import { UserId } from "../domain/UserId";
+import { UserPlan } from "../domain/UserPlan";
 import { UserRepository } from "../domain/UserRepository";
 
 type DatabaseUser = {
@@ -10,6 +11,7 @@ type DatabaseUser = {
 	profile_picture: string;
 	status: string;
 	suggested_courses: string;
+	subscription_plan: string;
 };
 
 export class MySqlUserRepository implements UserRepository {
@@ -19,21 +21,23 @@ export class MySqlUserRepository implements UserRepository {
 		const userPrimitives = user.toPrimitives();
 
 		const query = `
-			INSERT INTO mooc__users (id, name, email, profile_picture, status, suggested_courses)
+			INSERT INTO mooc__users (id, name, email, profile_picture, status, suggested_courses, subscription_plan)
 			VALUES (
 				'${userPrimitives.id}',
 				'${userPrimitives.name}',
 				'${userPrimitives.email}',
 				'${userPrimitives.profilePicture}',
 				'${userPrimitives.status.valueOf()}',
-				'${userPrimitives.suggestedCourses}'
+				'${userPrimitives.suggestedCourses}',
+				'${userPrimitives.plan.valueOf()}'
 			)
 			ON DUPLICATE KEY UPDATE
 				name = VALUES(name),
 				email = VALUES(email),
 				profile_picture = VALUES(profile_picture),
 				status = VALUES(status),
-				suggested_courses = VALUES(suggested_courses);
+				suggested_courses = VALUES(suggested_courses),
+				subscription_plan = VALUES(subscription_plan);
 `;
 
 		await this.connection.execute(query);
@@ -41,7 +45,7 @@ export class MySqlUserRepository implements UserRepository {
 
 	async search(id: UserId): Promise<User | null> {
 		const query = `
-			SELECT id, name, email, profile_picture, status, suggested_courses
+			SELECT id, name, email, profile_picture, status, suggested_courses, subscription_plan
 			FROM mooc__users
 			WHERE id = '${id.value}';
 		`;
@@ -59,6 +63,7 @@ export class MySqlUserRepository implements UserRepository {
 			profilePicture: result.profile_picture,
 			status: result.status,
 			suggestedCourses: result.suggested_courses,
+			plan: result.subscription_plan as UserPlan,
 		});
 	}
 }

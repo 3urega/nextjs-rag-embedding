@@ -1,5 +1,4 @@
 import { AggregateRoot } from "../../../shared/domain/AggregateRoot";
-
 import { PlanId } from "./PlanId";
 
 export type PlanPrimitives = {

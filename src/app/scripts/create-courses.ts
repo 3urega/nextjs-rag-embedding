@@ -22,9 +22,11 @@ async function main(repository: PostgresCourseRepository): Promise<void> {
 
 main(container.get(PostgresCourseRepository))
 	.catch(console.error)
-	.finally(async () => {
-		await container.get(PostgresConnection).end();
-		console.log("Done!");
+	.finally(() => {
+		void (async () => {
+			await container.get(PostgresConnection).end();
+			console.log("Done!");
 
-		process.exit(0);
+			process.exit(0);
+		})();
 	});

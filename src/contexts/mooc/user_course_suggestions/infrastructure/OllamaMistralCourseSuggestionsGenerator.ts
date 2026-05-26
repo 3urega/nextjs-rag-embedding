@@ -38,6 +38,7 @@ export class OllamaMistralCourseSuggestionsGenerator implements CourseSuggestion
 			),
 		);
 
+		// @ts-expect-error RunnableSequence + Ollama (langchain): incompatibilidad de tipos entre versiones
 		const chain = RunnableSequence.from([
 			PromptTemplate.fromTemplate(
 				`* Actúas como un recomendador de cursos avanzado.

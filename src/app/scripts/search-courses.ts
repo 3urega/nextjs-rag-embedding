@@ -32,9 +32,11 @@ const embeddingsGenerator = new OllamaEmbeddings({
 
 main(process.argv[2], pgConnection, embeddingsGenerator)
 	.catch(console.error)
-	.finally(async () => {
-		await pgConnection.end();
-		console.log("Done!");
+	.finally(() => {
+		void (async () => {
+			await pgConnection.end();
+			console.log("Done!");
 
-		process.exit(0);
+			process.exit(0);
+		})();
 	});

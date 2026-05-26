@@ -1,7 +1,6 @@
 import { Service } from "diod";
 
 import { CoursesByIdsSearcher } from "../../../courses/application/search-by-ids/CoursesByIdsSearcher";
-import { CourseSuggestions } from "../../../user-course-suggestions/domain/UserCourseSuggestionsGeneratedDomainEvent";
 import { UserFinder } from "../../../users/application/find/UserFinder";
 import { NextSuggestedCoursesEmail } from "../../domain/NextSuggestedCoursesEmail";
 import { NextSuggestedCoursesEmailRealSender } from "../../domain/NextSuggestedCoursesEmailRealSender";
@@ -14,7 +13,13 @@ export class NextSuggestedCoursesEmailSender {
 		private readonly sender: NextSuggestedCoursesEmailRealSender,
 	) {}
 
-	async send(userId: string, suggestions: CourseSuggestions): Promise<void> {
+	async send(
+		userId: string,
+		suggestions: {
+			courseId: string;
+			reason: string;
+		}[],
+	): Promise<void> {
 		const email = await this.createEmail(userId, suggestions);
 
 		await this.sender.send(email);
@@ -34,16 +39,14 @@ export class NextSuggestedCoursesEmailSender {
 		);
 
 		return NextSuggestedCoursesEmail.create(
-			user.email,
-			user.name,
+			user.email.value,
+			user.name.value,
 			courses.map((course) => {
-				const suggestion = suggestions.find(
-					(suggestion) => suggestion.courseId === course.id,
-				);
+				const suggestion = suggestions.find((suggestion) => suggestion.courseId === course.id);
 
 				return {
-					courseName: course.name,
-					courseSummary: course.summary,
+					courseName: String(course.name),
+					courseSummary: String(course.summary),
 					reason: suggestion?.reason ?? "",
 				};
 			}),

@@ -1,4 +1,5 @@
 import { UserPrimitives } from "../../../../../src/contexts/mooc/users/domain/User";
+import { UserPlan } from "../../../../../src/contexts/mooc/users/domain/UserPlan";
 import { UserRegisteredDomainEvent } from "../../../../../src/contexts/mooc/users/domain/UserRegisteredDomainEvent";
 import { UserStatus } from "../../../../../src/contexts/mooc/users/domain/UserStatus";
 import { UserEmailMother } from "./UserEmailMother";
@@ -15,6 +16,7 @@ export class UserRegisteredDomainEventMother {
 			profilePicture: UserProfilePictureMother.create().value,
 			status: UserStatus.Active,
 			suggestedCourses: "",
+			plan: UserPlan.Free,
 			...params,
 		};
 

@@ -127,8 +127,8 @@ export class PostgresCourseRepository
 
 	private serializeCourseForEmbedding(course: Primitives<Course>): string {
 		return [
-			`Name: ${course.name}`,
-			`Summary: ${course.summary}`,
+			`Name: ${String(course.name)}`,
+			`Summary: ${String(course.summary)}`,
 			`Categories: ${course.categories.join(", ")}`,
 		].join("|");
 	}

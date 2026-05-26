@@ -1,9 +1,9 @@
-import postgres from "postgres";
 import { OllamaEmbeddings } from "@langchain/ollama";
-import { readFileSync } from "fs";
-import { fileURLToPath } from "url";
-import { dirname, join } from "path";
 import crypto from "crypto";
+import { readFileSync } from "fs";
+import { dirname, join } from "path";
+import postgres from "postgres";
+import { fileURLToPath } from "url";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const plans = JSON.parse(readFileSync(join(__dirname, "femturisme-plans.json"), "utf-8"));
@@ -57,8 +57,13 @@ function buildStructuralChunks(p) {
 }
 
 function formatBool(v) {
-	if (v === true) return "sí";
-	if (v === false) return "no";
+	if (v === true) {
+		return "sí";
+	}
+	if (v === false) {
+		return "no";
+	}
+
 	return "no especificado";
 }
 
@@ -132,4 +137,3 @@ main().catch((e) => {
 	console.error(e);
 	process.exit(1);
 });
-

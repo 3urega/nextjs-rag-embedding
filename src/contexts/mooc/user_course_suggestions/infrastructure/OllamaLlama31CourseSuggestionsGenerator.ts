@@ -45,7 +45,7 @@ export class OllamaLlama31CourseSuggestionsGenerator implements CourseSuggestion
 		// sin arrastrar objetos ricos por la capa de infraestructura.
 		const primitives = userCourseSuggestions.toPrimitives();
 
-		const completedCourseIds = (primitives.completedCourseIds ?? []).map((id) => new CourseId(id));
+		const completedCourseIds = primitives.completedCourseIds.map((id) => new CourseId(id));
 
 		// Fuente de candidatos: buscamos cursos similares a lo ya completado.
 		// Importante: el LLM solo "elige" entre estos; aquí está el recorte de universo.
@@ -143,8 +143,8 @@ Cursos que el usuario ya ha completado:
 		// Invocamos la cadena con las variables del prompt.
 		// `formatCourse` aplana el objeto `Course` a texto legible para el LLM.
 		const suggestions = await chain.invoke({
-			available_courses: similarCourses.map(this.formatCourse).join("\n\n"),
-			completed_courses: completedCourses.map(this.formatCourse).join("\n\n"),
+			available_courses: similarCourses.map((c) => this.formatCourse(c)).join("\n\n"),
+			completed_courses: completedCourses.map((c) => this.formatCourse(c)).join("\n\n"),
 			format_instructions: outputParser.getFormatInstructions(),
 		});
 

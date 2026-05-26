@@ -1,6 +1,7 @@
-import { UserRepository } from "../../domain/UserRepository";
 import { Service } from "diod";
+
 import { DomainUserFinder } from "../../domain/DomainUserFinder";
+import { UserRepository } from "../../domain/UserRepository";
 
 @Service()
 export class UserCourseSuggestionsUpdater {

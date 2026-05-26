@@ -2,6 +2,7 @@ import { AggregateRoot } from "../../../shared/domain/AggregateRoot";
 import { UserEmail } from "./UserEmail";
 import { UserId } from "./UserId";
 import { UserName } from "./UserName";
+import { UserPlan } from "./UserPlan";
 import { UserProfilePicture } from "./UserProfilePicture";
 import { UserRegisteredDomainEvent } from "./UserRegisteredDomainEvent";
 import { UserStatus } from "./UserStatus";
@@ -13,6 +14,7 @@ export type UserPrimitives = {
 	profilePicture: string;
 	status: string;
 	suggestedCourses: string;
+	plan: string;
 };
 
 export class User extends AggregateRoot {
@@ -23,6 +25,7 @@ export class User extends AggregateRoot {
 		public readonly profilePicture: UserProfilePicture,
 		public status: UserStatus,
 		public suggestedCourses: string,
+		public plan: UserPlan,
 	) {
 		super();
 	}
@@ -30,6 +33,7 @@ export class User extends AggregateRoot {
 	static create(id: string, name: string, email: string, profilePicture: string): User {
 		const defaultUserStatus = UserStatus.Active;
 		const defaultSuggestedCourses: string = "";
+		const defaultPlan = UserPlan.Free;
 
 		const user = new User(
 			new UserId(id),
@@ -38,6 +42,7 @@ export class User extends AggregateRoot {
 			new UserProfilePicture(profilePicture),
 			defaultUserStatus,
 			defaultSuggestedCourses,
+			defaultPlan,
 		);
 
 		user.record(new UserRegisteredDomainEvent(id, name, email, profilePicture, defaultUserStatus));
@@ -53,6 +58,7 @@ export class User extends AggregateRoot {
 			new UserProfilePicture(primitives.profilePicture),
 			primitives.status as UserStatus,
 			primitives.suggestedCourses,
+			primitives.plan as UserPlan,
 		);
 	}
 
@@ -64,10 +70,15 @@ export class User extends AggregateRoot {
 			profilePicture: this.profilePicture.value,
 			status: this.status,
 			suggestedCourses: this.suggestedCourses,
+			plan: this.plan,
 		};
 	}
 
 	updateSuggestedCourses(suggestedCourses: string): void {
 		this.suggestedCourses = suggestedCourses;
+	}
+
+	setPlan(plan: UserPlan): void {
+		this.plan = plan;
 	}
 }

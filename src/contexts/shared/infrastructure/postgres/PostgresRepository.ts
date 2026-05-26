@@ -1,4 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
+/* eslint-disable @typescript-eslint/no-unsafe-argument -- tagged template sql spread */
 import { Service } from "diod";
 import postgres, { Row } from "postgres";
 

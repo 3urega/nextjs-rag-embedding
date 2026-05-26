@@ -35,7 +35,9 @@ export class InMemoryEventBus implements EventBus {
 	}
 
 	private ensureSubscribersRegistered(): void {
-		if (this.subscribersRegistered) return;
+		if (this.subscribersRegistered) {
+			return;
+		}
 
 		this.registerSubscribers(this.subscribersProvider());
 		this.subscribersRegistered = true;

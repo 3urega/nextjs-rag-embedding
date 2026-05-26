@@ -6,6 +6,13 @@
       "parserOptions": {
         "project": ["./tsconfig.json"]
       }
+    },
+    {
+      "files": ["src/app/scripts/*.mjs"],
+      "rules": {
+        "no-console": "off",
+        "no-await-in-loop": "off"
+      }
     }
   ]
 }

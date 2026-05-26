@@ -12,10 +12,10 @@ export abstract class DomainError extends Error {
 		return {
 			type: this.type,
 			description: this.message,
-			data: props.reduce((acc, [key, value]) => {
+			data: props.reduce<Record<string, unknown>>((acc, [key, value]) => {
 				return {
 					...acc,
-					[key]: value,
+					[key]: value as unknown,
 				};
 			}, {}),
 		};

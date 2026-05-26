@@ -1,0 +1,61 @@
+import { Service } from "diod";
+
+import { getSubscriptionPurchaseFromGooglePlay } from "../../../../../lib/billing/googlePlayAndroidPublisher";
+import { UserDoesNotExist } from "../../../../mooc/users/domain/UserDoesNotExist";
+import { UserId } from "../../../../mooc/users/domain/UserId";
+import { UserPlan } from "../../../../mooc/users/domain/UserPlan";
+import { UserRepository } from "../../../../mooc/users/domain/UserRepository";
+import { GooglePlaySubscriptionRepository } from "../../domain/GooglePlaySubscriptionRepository";
+
+/**
+ * Revalida la suscripción más reciente del usuario contra Google y baja el plan a FREE si expiró.
+ */
+@Service()
+export class SyncUserPlanFromGooglePlay {
+	constructor(
+		private readonly userRepository: UserRepository,
+		private readonly subscriptionRepository: GooglePlaySubscriptionRepository,
+	) {}
+
+	async run(userId: string): Promise<{ plan: UserPlan }> {
+		const packageName = process.env.GOOGLE_PLAY_PACKAGE_NAME;
+		if (!packageName) {
+			throw new Error("GOOGLE_PLAY_PACKAGE_NAME is not set");
+		}
+
+		const sub = await this.subscriptionRepository.searchLatestByUserId(userId);
+		if (!sub) {
+			const user = await this.userRepository.search(new UserId(userId));
+			if (!user) {
+				throw new UserDoesNotExist(userId);
+			}
+
+			return { plan: user.plan };
+		}
+
+		const p = sub.toPrimitives();
+		const remote = await getSubscriptionPurchaseFromGooglePlay(
+			packageName,
+			p.productId,
+			p.purchaseToken,
+		);
+
+		const expiryMs =
+			remote.expiryTimeMillis !== undefined && remote.expiryTimeMillis !== null
+				? Number(remote.expiryTimeMillis)
+				: null;
+		const now = Date.now();
+		const isActive = expiryMs !== null && expiryMs > now;
+
+		const user = await this.userRepository.search(new UserId(userId));
+		if (!user) {
+			throw new UserDoesNotExist(userId);
+		}
+
+		const plan = isActive ? UserPlan.Premium : UserPlan.Free;
+		user.setPlan(plan);
+		await this.userRepository.save(user);
+
+		return { plan };
+	}
+}

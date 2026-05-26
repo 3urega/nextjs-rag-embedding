@@ -1,5 +1,6 @@
-import { EventBus } from "../../../../shared/domain/event/EventBus";
 import { Service } from "diod";
+
+import { EventBus } from "../../../../shared/domain/event/EventBus";
 import { UserId } from "../../../users/domain/UserId";
 import { CourseSuggestionsGenerator } from "../../domain/CourseSuggestionsGenerator";
 import { UserCourseSuggestions } from "../../domain/UserCourseSuggestions";

@@ -1,4 +1,19 @@
-/** @type {import('next').NextConfig} */
-const nextConfig = {};
+const isCapacitorStatic = process.env.CAPACITOR_STATIC === "1";
 
-module.exports = nextConfig
+/** @type {import('next').NextConfig} */
+const nextConfig = {
+	...(isCapacitorStatic
+		? {
+				output: "export",
+				images: {
+					unoptimized: true,
+				},
+			}
+		: {}),
+	experimental: {
+		instrumentationHook: true,
+		serverComponentsExternalPackages: ["googleapis", "postgres"],
+	},
+};
+
+module.exports = nextConfig;

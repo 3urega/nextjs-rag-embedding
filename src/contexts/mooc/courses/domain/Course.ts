@@ -1,7 +1,6 @@
 import { Primitives } from "@codelytv/primitives-type";
 
 import { AggregateRoot } from "../../../shared/domain/AggregateRoot";
-
 import { CourseId } from "./CourseId";
 
 export class Course extends AggregateRoot {
@@ -16,21 +15,21 @@ export class Course extends AggregateRoot {
 	}
 
 	static fromPrimitives(primitives: Primitives<Course>): Course {
+		const publishedAt =
+			primitives.publishedAt instanceof Date
+				? primitives.publishedAt
+				: new Date(String(primitives.publishedAt));
+
 		return new Course(
 			new CourseId(primitives.id),
-			primitives.name,
-			primitives.summary,
-			primitives.categories,
-			primitives.publishedAt,
+			primitives.name as string,
+			primitives.summary as string,
+			primitives.categories as string[],
+			publishedAt,
 		);
 	}
 
-	create(
-		id: string,
-		name: string,
-		summary: string,
-		categories: string[],
-	): Course {
+	create(id: string, name: string, summary: string, categories: string[]): Course {
 		const publishedAt = new Date();
 
 		return Course.fromPrimitives({

@@ -17,7 +17,8 @@ CREATE TABLE mooc.users (
 	email VARCHAR(255) NOT NULL,
 	profile_picture VARCHAR(255) NOT NULL,
 	status VARCHAR(255) NOT NULL,
-	suggested_courses jsonb
+	suggested_courses jsonb,
+	subscription_plan VARCHAR(32) NOT NULL DEFAULT 'FREE'
 );
 
 CREATE TABLE mooc.user_course_suggestions (

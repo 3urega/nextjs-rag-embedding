@@ -1,6 +1,5 @@
-import { randomUUID } from "crypto";
-
 import { OllamaEmbeddings } from "@langchain/ollama";
+import { randomUUID } from "crypto";
 import { Service } from "diod";
 
 import { PostgresConnection } from "../../../shared/infrastructure/postgres/PostgresConnection";
@@ -71,15 +70,17 @@ export class PostgresPlanRepository implements PlanRepository {
 			DELETE FROM femturisme.plan_chunks WHERE plan_id = ${p.id};
 		`;
 
-		for (let idx = 0; idx < chunks.length; idx++) {
-			const [vector] = await this.embeddings.embedDocuments([chunks[idx]]);
-			const chunkId = randomUUID();
+		await Promise.all(
+			chunks.map(async (chunk, idx) => {
+				const [vector] = await this.embeddings.embedDocuments([chunk]);
+				const chunkId = randomUUID();
 
-			await this.connection.sql`
-				INSERT INTO femturisme.plan_chunks (id, plan_id, chunk_index, content, embedding)
-				VALUES (${chunkId}, ${p.id}, ${idx}, ${chunks[idx]}, ${JSON.stringify(vector)});
-			`;
-		}
+				await this.connection.sql`
+					INSERT INTO femturisme.plan_chunks (id, plan_id, chunk_index, content, embedding)
+					VALUES (${chunkId}, ${p.id}, ${idx}, ${chunk}, ${JSON.stringify(vector)});
+				`;
+			}),
+		);
 	}
 
 	async search(id: PlanId): Promise<Plan | null> {
@@ -121,13 +122,14 @@ export class PostgresPlanRepository implements PlanRepository {
 			: typeof rawTags === "string"
 				? (JSON.parse(rawTags) as string[])
 				: [];
+
 		return Plan.fromPrimitives({
 			id: row.id,
 			title: row.title,
 			description: row.description,
 			location: row.location,
 			url: row.url,
-			tags: tags ?? [],
+			tags,
 			childrenFriendly: row.children_friendly,
 			vehicleRequired: row.vehicle_required,
 			overnightPossible: row.overnight_possible,
@@ -147,7 +149,9 @@ export class PostgresPlanRepository implements PlanRepository {
 		const chunks: string[] = [];
 
 		chunks.push(
-			[header, `Ubicación: ${p.location || "No especificada"}`, `Tags: ${(p.tags || []).join(", ")}`].join("\n"),
+			[header, `Ubicación: ${p.location ?? "No especificada"}`, `Tags: ${p.tags.join(", ")}`].join(
+				"\n",
+			),
 		);
 
 		chunks.push(
@@ -165,8 +169,13 @@ export class PostgresPlanRepository implements PlanRepository {
 	}
 
 	private formatBool(v: boolean | null): string {
-		if (v === true) return "sí";
-		if (v === false) return "no";
+		if (v === true) {
+			return "sí";
+		}
+		if (v === false) {
+			return "no";
+		}
+
 		return "no especificado";
 	}
 }

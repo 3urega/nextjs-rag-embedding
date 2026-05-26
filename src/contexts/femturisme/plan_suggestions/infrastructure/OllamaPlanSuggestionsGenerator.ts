@@ -66,13 +66,12 @@ Planes disponibles (recuperados por similitud semántica):
 			format_instructions: outputParser.getFormatInstructions(),
 		});
 
-		return suggestions.map(
-			(s) => new PlanSuggestion(s.planId, s.planTitle, s.reason),
-		);
+		return suggestions.map((s) => new PlanSuggestion(s.planId, s.planTitle, s.reason));
 	}
 
 	private formatResult(result: PlanSearchResult): string {
 		const { plan, matchedChunkContent } = result;
+
 		return this.formatPlan(plan, matchedChunkContent);
 	}
 
@@ -81,7 +80,9 @@ Planes disponibles (recuperados por similitud semántica):
 		const flags = [
 			p.childrenFriendly !== null ? `apto para niños: ${p.childrenFriendly ? "sí" : "no"}` : null,
 			p.vehicleRequired !== null ? `requiere vehículo: ${p.vehicleRequired ? "sí" : "no"}` : null,
-			p.overnightPossible !== null ? `posibilidad de pernocta: ${p.overnightPossible ? "sí" : "no"}` : null,
+			p.overnightPossible !== null
+				? `posibilidad de pernocta: ${p.overnightPossible ? "sí" : "no"}`
+				: null,
 		]
 			.filter(Boolean)
 			.join(", ");

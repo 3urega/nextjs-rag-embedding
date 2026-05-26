@@ -12,10 +12,7 @@ import { container } from "../../../../../contexts/shared/infrastructure/depende
 import { executeWithErrorHandling } from "../../../../../contexts/shared/infrastructure/http/executeWithErrorHandling";
 import { HttpNextResponse } from "../../../../../contexts/shared/infrastructure/http/HttpNextResponse";
 
-export async function GET(
-	_request: Request,
-	context: { params: Params },
-): Promise<NextResponse> {
+export async function GET(_request: Request, context: { params: Params }): Promise<NextResponse> {
 	return executeWithErrorHandling(
 		async () => {
 			const finder = container.get(UserFinder);
@@ -32,10 +29,7 @@ export async function GET(
 	);
 }
 
-export async function PUT(
-	request: Request,
-	context: { params: Params },
-): Promise<NextResponse> {
+export async function PUT(request: Request, context: { params: Params }): Promise<NextResponse> {
 	return executeWithErrorHandling(async () => {
 		const registrar = container.get(UserRegistrar);
 

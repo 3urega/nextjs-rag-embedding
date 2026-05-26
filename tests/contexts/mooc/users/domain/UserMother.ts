@@ -1,4 +1,5 @@
 import { User, UserPrimitives } from "../../../../../src/contexts/mooc/users/domain/User";
+import { UserPlan } from "../../../../../src/contexts/mooc/users/domain/UserPlan";
 import { UserStatus } from "../../../../../src/contexts/mooc/users/domain/UserStatus";
 import { UserEmailMother } from "./UserEmailMother";
 import { UserIdMother } from "./UserIdMother";
@@ -14,6 +15,7 @@ export class UserMother {
 			profilePicture: UserProfilePictureMother.create().value,
 			suggestedCourses: "",
 			status: UserStatus.Active,
+			plan: UserPlan.Free,
 			...params,
 		};
 

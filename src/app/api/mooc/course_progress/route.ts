@@ -21,9 +21,10 @@ export async function POST(request: Request): Promise<NextResponse> {
 
 	const primitives = user.toPrimitives();
 
-	const suggestedCourses = (primitives.suggestedCourses && primitives.suggestedCourses.trim())
-		? (JSON.parse(primitives.suggestedCourses) as CourseSuggestionPrimitives[])
-		: [];
+	const suggestedCourses =
+		primitives.suggestedCourses && primitives.suggestedCourses.trim()
+			? (JSON.parse(primitives.suggestedCourses) as CourseSuggestionPrimitives[])
+			: [];
 
 	return NextResponse.json({
 		name: primitives.name,

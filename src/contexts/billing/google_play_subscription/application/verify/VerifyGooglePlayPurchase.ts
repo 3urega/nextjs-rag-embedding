@@ -1,0 +1,67 @@
+import { Service } from "diod";
+
+import { getSubscriptionPurchaseFromGooglePlay } from "../../../../../lib/billing/googlePlayAndroidPublisher";
+import { UserFinder } from "../../../../mooc/users/application/find/UserFinder";
+import { UserPlan } from "../../../../mooc/users/domain/UserPlan";
+import { UserRepository } from "../../../../mooc/users/domain/UserRepository";
+import { GooglePlaySubscription } from "../../domain/GooglePlaySubscription";
+import { GooglePlaySubscriptionRepository } from "../../domain/GooglePlaySubscriptionRepository";
+import { PurchaseTokenAlreadyLinked } from "../../domain/PurchaseTokenAlreadyLinked";
+
+export type VerifyGooglePlayPurchaseParams = {
+	userId: string;
+	purchaseToken: string;
+	productId: string;
+};
+
+@Service()
+export class VerifyGooglePlayPurchase {
+	constructor(
+		private readonly userFinder: UserFinder,
+		private readonly userRepository: UserRepository,
+		private readonly subscriptionRepository: GooglePlaySubscriptionRepository,
+	) {}
+
+	async run(params: VerifyGooglePlayPurchaseParams): Promise<{ plan: UserPlan }> {
+		const packageName = process.env.GOOGLE_PLAY_PACKAGE_NAME;
+		if (!packageName) {
+			throw new Error("GOOGLE_PLAY_PACKAGE_NAME is not set");
+		}
+
+		const user = await this.userFinder.find(params.userId);
+
+		const existing = await this.subscriptionRepository.searchByPurchaseToken(params.purchaseToken);
+		if (existing && existing.toPrimitives().userId !== params.userId) {
+			throw new PurchaseTokenAlreadyLinked();
+		}
+
+		const remote = await getSubscriptionPurchaseFromGooglePlay(
+			packageName,
+			params.productId,
+			params.purchaseToken,
+		);
+
+		const expiryMs =
+			remote.expiryTimeMillis !== undefined && remote.expiryTimeMillis !== null
+				? Number(remote.expiryTimeMillis)
+				: null;
+		const now = Date.now();
+		const isActive = expiryMs !== null && expiryMs > now;
+
+		const subscription = GooglePlaySubscription.create({
+			purchaseToken: params.purchaseToken,
+			userId: params.userId,
+			productId: params.productId,
+			expiryTimeMs: expiryMs,
+			autoRenewing: Boolean(remote.autoRenewing),
+		});
+
+		await this.subscriptionRepository.upsert(subscription);
+
+		const plan = isActive ? UserPlan.Premium : UserPlan.Free;
+		user.setPlan(plan);
+		await this.userRepository.save(user);
+
+		return { plan };
+	}
+}

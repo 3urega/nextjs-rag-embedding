@@ -10,9 +10,7 @@ export class CoursesByIdsSearcher {
 	constructor(private readonly repository: CourseRepository) {}
 
 	async search(ids: string[]): Promise<Primitives<Course>[]> {
-		const courses = await this.repository.searchByIds(
-			ids.map((id) => new CourseId(id)),
-		);
+		const courses = await this.repository.searchByIds(ids.map((id) => new CourseId(id)));
 
 		return courses.map((course) => course.toPrimitives());
 	}

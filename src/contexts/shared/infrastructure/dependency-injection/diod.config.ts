@@ -1,6 +1,11 @@
 import "reflect-metadata";
+
 import { ContainerBuilder } from "diod";
 
+import { SyncUserPlanFromGooglePlay } from "../../../../contexts/billing/google_play_subscription/application/sync/SyncUserPlanFromGooglePlay";
+import { VerifyGooglePlayPurchase } from "../../../../contexts/billing/google_play_subscription/application/verify/VerifyGooglePlayPurchase";
+import { GooglePlaySubscriptionRepository } from "../../../../contexts/billing/google_play_subscription/domain/GooglePlaySubscriptionRepository";
+import { PostgresGooglePlaySubscriptionRepository } from "../../../../contexts/billing/google_play_subscription/infrastructure/PostgresGooglePlaySubscriptionRepository";
 import { UserCourseProgressCompleter } from "../../../../contexts/mooc/user_course_progress/application/complete/UserCourseProgressCompleter";
 import { GenerateUserCourseSuggestionsOnUserCourseProgressCompleted } from "../../../../contexts/mooc/user_course_suggestions/application/generate/GenerateUserCourseSuggestionsOnUserCourseProgressCompleted";
 import { UserCourseSuggestionsGenerator } from "../../../../contexts/mooc/user_course_suggestions/application/generate/UserCourseSuggestionsGenerator";
@@ -13,15 +18,16 @@ import { UserCourseSuggestionsUpdater } from "../../../../contexts/mooc/users/ap
 import { DomainUserFinder } from "../../../../contexts/mooc/users/domain/DomainUserFinder";
 import { UserRepository } from "../../../../contexts/mooc/users/domain/UserRepository";
 import { PostgresUserRepository } from "../../../../contexts/mooc/users/infrastructure/PostgresUserRepository";
+import { loadProjectEnv } from "../../../../lib/loadProjectEnv";
+import { PlanSuggester } from "../../../femturisme/plan_suggestions/application/suggest/PlanSuggester";
+import { PlanSuggestionsGenerator } from "../../../femturisme/plan_suggestions/domain/PlanSuggestionsGenerator";
+import { OllamaPlanSuggestionsGenerator } from "../../../femturisme/plan_suggestions/infrastructure/OllamaPlanSuggestionsGenerator";
+import { PlanRepository } from "../../../femturisme/plans/domain/PlanRepository";
+import { PostgresPlanRepository } from "../../../femturisme/plans/infrastructure/PostgresPlanRepository";
 import { CoursesByIdsSearcher } from "../../../mooc/courses/application/search-by-ids/CoursesByIdsSearcher";
 import { CourseRepository } from "../../../mooc/courses/domain/CourseRepository";
 import { PostgresCourseRepository } from "../../../mooc/courses/infrastructure/PostgresCourseRepository";
 import { NextSuggestedCoursesEmailSender } from "../../../mooc/next-suggested-courses-email/application/send-next-suggested-courses-email/NextSuggestedCoursesEmailSender";
-import { PlanRepository } from "../../../femturisme/plans/domain/PlanRepository";
-import { PostgresPlanRepository } from "../../../femturisme/plans/infrastructure/PostgresPlanRepository";
-import { PlanSuggestionsGenerator } from "../../../femturisme/plan_suggestions/domain/PlanSuggestionsGenerator";
-import { PlanSuggester } from "../../../femturisme/plan_suggestions/application/suggest/PlanSuggester";
-import { OllamaPlanSuggestionsGenerator } from "../../../femturisme/plan_suggestions/infrastructure/OllamaPlanSuggestionsGenerator";
 import { NextSuggestedCoursesEmailRealSender } from "../../../mooc/next-suggested-courses-email/domain/NextSuggestedCoursesEmailRealSender";
 import { ConsoleLogNextSuggestedCoursesEmailRealSender } from "../../../mooc/next-suggested-courses-email/infrastructure/ConsoleLogNextSuggestedCoursesEmailRealSender";
 import { UserFinder } from "../../../mooc/users/application/find/UserFinder";
@@ -32,13 +38,21 @@ import { EventBus } from "../../domain/event/EventBus";
 import { InMemoryEventBus } from "../domain_event/InMemoryEventBus";
 import { PostgresConnection } from "../postgres/PostgresConnection";
 
+loadProjectEnv();
+
 const builder = new ContainerBuilder();
 
 // Shared
 builder
 	.register(PostgresConnection)
 	.useFactory(() => {
-		return new PostgresConnection("localhost", 5432, "codely", "c0d3ly7v", "postgres");
+		const host = process.env.POSTGRES_HOST ?? "localhost";
+		const port = Number(process.env.POSTGRES_PORT ?? "5432");
+		const user = process.env.POSTGRES_USER ?? "codely";
+		const password = process.env.POSTGRES_PASSWORD ?? "c0d3ly7v";
+		const database = process.env.POSTGRES_DB ?? "postgres";
+
+		return new PostgresConnection(host, port, user, password, database);
 	})
 	.asSingleton();
 
@@ -53,6 +67,12 @@ builder.register(EventBus).useFactory(({ get, findTaggedServiceIdentifiers }) =>
 // User
 builder.register(UserRepository).use(PostgresUserRepository);
 builder.registerAndUse(PostgresUserRepository);
+
+builder.register(GooglePlaySubscriptionRepository).use(PostgresGooglePlaySubscriptionRepository);
+builder.registerAndUse(PostgresGooglePlaySubscriptionRepository);
+
+builder.registerAndUse(VerifyGooglePlayPurchase);
+builder.registerAndUse(SyncUserPlanFromGooglePlay);
 
 builder.registerAndUse(UserRegistrar);
 
