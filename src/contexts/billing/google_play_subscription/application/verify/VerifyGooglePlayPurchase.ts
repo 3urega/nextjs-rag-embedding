@@ -45,18 +45,17 @@ export class VerifyGooglePlayPurchase {
 			remote.expiryTimeMillis !== undefined && remote.expiryTimeMillis !== null
 				? Number(remote.expiryTimeMillis)
 				: null;
-		const now = Date.now();
-		const isActive = expiryMs !== null && expiryMs > now;
+		const isActive = expiryMs !== null && expiryMs > Date.now();
 
-		const subscription = GooglePlaySubscription.create({
-			purchaseToken: params.purchaseToken,
-			userId: params.userId,
-			productId: params.productId,
-			expiryTimeMs: expiryMs,
-			autoRenewing: Boolean(remote.autoRenewing),
-		});
-
-		await this.subscriptionRepository.upsert(subscription);
+		await this.subscriptionRepository.upsert(
+			GooglePlaySubscription.create({
+				purchaseToken: params.purchaseToken,
+				userId: params.userId,
+				productId: params.productId,
+				expiryTimeMs: expiryMs,
+				autoRenewing: Boolean(remote.autoRenewing),
+			}),
+		);
 
 		const plan = isActive ? UserPlan.Premium : UserPlan.Free;
 		user.setPlan(plan);

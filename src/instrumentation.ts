@@ -3,23 +3,17 @@ export function register(): void {
 		return;
 	}
 
-	// No importar `loadProjectEnv` aquí: el bundler de Next puede fallar al resolver módulos Node.
-	// La carga ordenada ocurre en `diod.config.ts` al arrancar las rutas API.
-
 	if (process.env.NODE_ENV !== "production") {
 		return;
 	}
 
 	const missing: string[] = [];
-	if (!process.env.POSTGRES_PASSWORD && !process.env.DATABASE_URL) {
-		missing.push("POSTGRES_* or DATABASE_URL");
+	if (!process.env.AUTH_SECRET || process.env.AUTH_SECRET.length < 16) {
+		missing.push("AUTH_SECRET (min 16 chars)");
 	}
 
 	if (missing.length > 0) {
 		// eslint-disable-next-line no-console
-		console.warn(
-			"[instrumentation] Producción: faltan variables de entorno críticas para la base de datos:",
-			missing.join(", "),
-		);
+		console.warn("[instrumentation] Producción: faltan variables críticas:", missing.join(", "));
 	}
 }

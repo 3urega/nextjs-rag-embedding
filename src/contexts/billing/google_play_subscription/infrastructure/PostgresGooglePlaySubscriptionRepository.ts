@@ -62,14 +62,12 @@ export class PostgresGooglePlaySubscriptionRepository implements GooglePlaySubsc
 	}
 
 	private toAggregate(row: SubscriptionRow): GooglePlaySubscription {
-		const r = row;
-
 		return GooglePlaySubscription.create({
-			purchaseToken: r.purchase_token,
-			userId: r.user_id,
-			productId: r.product_id,
-			expiryTimeMs: r.expiry_time_ms !== null ? Number(r.expiry_time_ms) : null,
-			autoRenewing: r.auto_renewing,
+			purchaseToken: row.purchase_token,
+			userId: row.user_id,
+			productId: row.product_id,
+			expiryTimeMs: row.expiry_time_ms !== null ? Number(row.expiry_time_ms) : null,
+			autoRenewing: row.auto_renewing,
 		});
 	}
 }

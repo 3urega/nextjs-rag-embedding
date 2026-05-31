@@ -1,13 +1,14 @@
 # Useful commands
 
 ```bash
-npm prep          # lint + build + test
+npm prep          # lint + build (Jest desactivado en prep; ver nota abajo)
 docker compose up -d   # Postgres + schema starter
 npm run dev       # local dev server (not Docker)
 npm run lint:fix
-npm run test
 npm run build:capacitor   # export out/ + cap sync android
 ```
+
+**Tests:** la suite Jest actual apunta sobre todo a contextos legacy y puede colgar o fallar. No forma parte del flujo del starter activo hasta reescribir tests para `identity`/`billing`.
 
 # Architecture
 

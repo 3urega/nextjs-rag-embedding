@@ -1,8 +1,5 @@
 import { UserPlan } from "../../contexts/identity/users/domain/UserPlan";
 
-/**
- * Patrón de límites por plan: sustituye por reglas de negocio reales (cuotas, features, etc.).
- */
 export function maxEmbeddingsPerQueryForPlan(plan: UserPlan): number {
 	switch (plan) {
 		case UserPlan.Premium:

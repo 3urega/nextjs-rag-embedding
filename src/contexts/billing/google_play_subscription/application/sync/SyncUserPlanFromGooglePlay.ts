@@ -7,9 +7,6 @@ import { UserPlan } from "../../../../identity/users/domain/UserPlan";
 import { UserRepository } from "../../../../identity/users/domain/UserRepository";
 import { GooglePlaySubscriptionRepository } from "../../domain/GooglePlaySubscriptionRepository";
 
-/**
- * Revalida la suscripción más reciente del usuario contra Google y baja el plan a FREE si expiró.
- */
 @Service()
 export class SyncUserPlanFromGooglePlay {
 	constructor(
@@ -44,8 +41,7 @@ export class SyncUserPlanFromGooglePlay {
 			remote.expiryTimeMillis !== undefined && remote.expiryTimeMillis !== null
 				? Number(remote.expiryTimeMillis)
 				: null;
-		const now = Date.now();
-		const isActive = expiryMs !== null && expiryMs > now;
+		const isActive = expiryMs !== null && expiryMs > Date.now();
 
 		const user = await this.userRepository.search(new UserId(userId));
 		if (!user) {
@@ -54,9 +50,9 @@ export class SyncUserPlanFromGooglePlay {
 
 		const plan = isActive ? UserPlan.Premium : UserPlan.Free;
 		user.setPlan(plan);
-		const existing = await this.userRepository.searchByEmail(user.email.value);
-		await this.userRepository.save(user, existing?.passwordHash ?? "");
+		const credentials = await this.userRepository.searchByEmail(user.email.value);
+		await this.userRepository.save(user, credentials?.passwordHash ?? "");
 
-		return { plan };
+		return { plan: user.plan };
 	}
 }

@@ -23,13 +23,13 @@ const builder = new ContainerBuilder();
 builder
 	.register(PostgresConnection)
 	.useFactory(() => {
-		const host = process.env.POSTGRES_HOST ?? "localhost";
-		const port = Number(process.env.POSTGRES_PORT ?? "5432");
-		const user = process.env.POSTGRES_USER ?? "codely";
-		const password = process.env.POSTGRES_PASSWORD ?? "c0d3ly7v";
-		const database = process.env.POSTGRES_DB ?? "postgres";
-
-		return new PostgresConnection(host, port, user, password, database);
+		return new PostgresConnection(
+			process.env.POSTGRES_HOST ?? "localhost",
+			Number(process.env.POSTGRES_PORT ?? "5432"),
+			process.env.POSTGRES_USER ?? "codely",
+			process.env.POSTGRES_PASSWORD ?? "c0d3ly7v",
+			process.env.POSTGRES_DB ?? "postgres",
+		);
 	})
 	.asSingleton();
 
@@ -37,15 +37,15 @@ builder.register(UserRepository).use(PostgresUserRepository);
 builder.registerAndUse(PostgresUserRepository);
 
 builder.registerAndUse(UserRegistrar);
-builder.registerAndUse(UserAuthenticator);
 builder.registerAndUse(UserFinder);
+builder.registerAndUse(UserAuthenticator);
 builder.registerAndUse(UserProfileUpdater);
 
 builder.register(GooglePlaySubscriptionRepository).use(PostgresGooglePlaySubscriptionRepository);
 builder.registerAndUse(PostgresGooglePlaySubscriptionRepository);
-
 builder.registerAndUse(VerifyGooglePlayPurchase);
 builder.registerAndUse(SyncUserPlanFromGooglePlay);
+
 builder.registerAndUse(DemoPlanSetter);
 
 export const container = builder.build();

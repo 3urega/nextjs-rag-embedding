@@ -2,59 +2,74 @@ import Link from "next/link";
 
 export default function HomePage(): React.ReactElement {
 	return (
-		<main style={{ maxWidth: "48rem", margin: "0 auto", padding: "2rem", lineHeight: 1.6 }}>
-			<h1>Starter point</h1>
-			<p>
-				Plantilla para apps <strong>web + Android (Capacitor)</strong> con backend Next.js,
-				arquitectura hexagonal y ejemplos de auth y billing.
+		<main style={{ maxWidth: "48rem", margin: "0 auto", padding: "2rem 1rem" }}>
+			<h1>Next.js + Capacitor Starter</h1>
+			<p style={{ lineHeight: 1.6, color: "#333" }}>
+				Plantilla para apps <strong>web + Android</strong> con backend Next.js (hexagonal / DDD),
+				autenticación JWT, billing de ejemplo y código legacy RAG como referencia.
 			</p>
 
-			<h2>Qué incluye (activo)</h2>
-			<ul>
-				<li>
-					<code>src/contexts/identity</code> — usuarios, registro, login JWT en cookie, perfil
-				</li>
-				<li>
-					<code>src/contexts/billing</code> — Google Play verify/sync + demo de plan en local
-				</li>
-				<li>
-					<code>src/contexts/shared</code> — Postgres, DI (diod), HTTP helpers
-				</li>
-				<li>
-					Capacitor: <code>npm run build:capacitor</code>, <code>capacitor.config.ts</code>
-				</li>
-				<li>
-					CORS para WebView Android en <code>src/middleware.ts</code>
-				</li>
-			</ul>
+			<section style={{ marginTop: "2rem" }}>
+				<h2>Qué incluye</h2>
+				<ul style={{ lineHeight: 1.8 }}>
+					<li>
+						<code>src/contexts/identity/</code> — usuarios, registro, login, perfil
+					</li>
+					<li>
+						<code>src/contexts/billing/</code> — Google Play verify/sync + demo plan
+					</li>
+					<li>
+						<code>src/contexts/shared/</code> — Postgres, DI (diod), HTTP helpers
+					</li>
+					<li>
+						<code>src/contexts/legacy/</code> — MOOC / Femturisme RAG (solo referencia, sin DI)
+					</li>
+					<li>Capacitor + export estático para Android</li>
+				</ul>
+			</section>
 
-			<h2>Referencia legacy</h2>
-			<p>
-				El código RAG/MOOC/Femturisme vive en <code>src/contexts/legacy/</code> (sin DI ni APIs
-				activas). SQL en <code>databases/legacy/</code>.
-			</p>
+			<section style={{ marginTop: "2rem" }}>
+				<h2>Probar el starter</h2>
+				<ol style={{ lineHeight: 1.8 }}>
+					<li>
+						<code>docker compose up -d</code> y <code>npm run dev</code>
+					</li>
+					<li>
+						Copia <code>.env.example</code> → <code>.env.local</code> (AUTH_SECRET,
+						ALLOW_DEMO_BILLING=1)
+					</li>
+					<li>
+						<Link href="/register">Regístrate</Link> o <Link href="/login">login</Link> (botón demo
+						incluido)
+					</li>
+					<li>
+						En <Link href="/profile">/profile</Link>: edita perfil y prueba billing demo
+						FREE/PREMIUM
+					</li>
+				</ol>
+			</section>
 
-			<h2>Empezar</h2>
-			<ol>
-				<li>
-					<code>docker compose up -d</code> (Postgres + schema <code>starter</code>)
-				</li>
-				<li>
-					Copiar <code>.env.example</code> → <code>.env.local</code> y definir{" "}
-					<code>AUTH_SECRET</code>
-				</li>
-				<li>
-					<code>npm install && npm run dev</code>
-				</li>
-			</ol>
+			<section style={{ marginTop: "2rem" }}>
+				<h2>Build Android</h2>
+				<pre
+					style={{
+						background: "#f5f5f5",
+						padding: "1rem",
+						borderRadius: "4px",
+						overflow: "auto",
+					}}
+				>
+					{`# Backend desplegado; en build móvil:
+NEXT_PUBLIC_API_URL=https://tu-api.example.com
+npm run build:capacitor`}
+				</pre>
+			</section>
 
-			<p style={{ marginTop: "2rem" }}>
-				<Link href="/login">Iniciar sesión</Link>
-				{" · "}
-				<Link href="/register">Crear cuenta</Link>
-				{" · "}
-				<Link href="/profile">Ver perfil</Link>
-			</p>
+			<section style={{ marginTop: "2rem", fontSize: "0.9rem", color: "#666" }}>
+				<p>
+					Documentación de convenciones en <code>docs/</code> y comandos en <code>README.md</code>.
+				</p>
+			</section>
 		</main>
 	);
 }

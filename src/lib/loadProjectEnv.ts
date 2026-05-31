@@ -29,10 +29,6 @@ function applyEnvFromFileContent(content: string, override: boolean): void {
 	}
 }
 
-/**
- * Carga variables de entorno en orden de prioridad creciente (las últimas ganan).
- * Sin dependencia `dotenv` para evitar conflictos con el bundler de `instrumentation`.
- */
 export function loadProjectEnv(): void {
 	const root = process.cwd();
 	const files = [".env", ".env.development", ".env.dev", ".env.local"];
@@ -43,7 +39,6 @@ export function loadProjectEnv(): void {
 			continue;
 		}
 
-		const content = readFileSync(filePath, "utf8");
-		applyEnvFromFileContent(content, true);
+		applyEnvFromFileContent(readFileSync(filePath, "utf8"), true);
 	}
 }

@@ -12,7 +12,7 @@ const nextConfig = {
 		: {}),
 	experimental: {
 		instrumentationHook: true,
-		serverComponentsExternalPackages: ["googleapis", "postgres"],
+		serverComponentsExternalPackages: ["googleapis", "postgres", "bcryptjs"],
 	},
 };
 

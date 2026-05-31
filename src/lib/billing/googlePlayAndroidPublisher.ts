@@ -5,10 +5,6 @@ export type GoogleSubscriptionPurchaseData = {
 	autoRenewing?: boolean | null;
 };
 
-/**
- * Obtiene el cliente Android Publisher (v3) con credenciales de cuenta de servicio.
- * Requiere `GOOGLE_PLAY_SERVICE_ACCOUNT_JSON` (JSON completo en una línea o multilínea).
- */
 export function getAndroidPublisherV3(): ReturnType<typeof google.androidpublisher> {
 	const raw = process.env.GOOGLE_PLAY_SERVICE_ACCOUNT_JSON;
 	if (!raw) {

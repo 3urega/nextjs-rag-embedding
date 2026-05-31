@@ -17,15 +17,13 @@ export abstract class PostgresRepository<T extends AggregateRoot> {
 	protected abstract toAggregate(row: Row): T;
 
 	protected async searchOne(strings: TemplateStringsArray, ...values: any[]): Promise<T | null> {
-		const query = this.sql(strings, ...values);
-		const result = await query;
+		const result = await this.sql(strings, ...values);
 
 		return result.length ? this.toAggregate(result[0]) : null;
 	}
 
 	protected async searchMany(strings: TemplateStringsArray, ...values: any[]): Promise<T[]> {
-		const query = this.sql(strings, ...values);
-		const result = await query;
+		const result = await this.sql(strings, ...values);
 
 		return result.map((row) => this.toAggregate(row));
 	}
