@@ -1,4 +1,4 @@
-import { UserPlan } from "../../contexts/mooc/users/domain/UserPlan";
+import { UserPlan } from "../../contexts/identity/users/domain/UserPlan";
 
 /**
  * Patrón de límites por plan: sustituye por reglas de negocio reales (cuotas, features, etc.).

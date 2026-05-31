@@ -1,10 +1,10 @@
 import { Service } from "diod";
 
 import { getSubscriptionPurchaseFromGooglePlay } from "../../../../../lib/billing/googlePlayAndroidPublisher";
-import { UserDoesNotExist } from "../../../../mooc/users/domain/UserDoesNotExist";
-import { UserId } from "../../../../mooc/users/domain/UserId";
-import { UserPlan } from "../../../../mooc/users/domain/UserPlan";
-import { UserRepository } from "../../../../mooc/users/domain/UserRepository";
+import { UserDoesNotExist } from "../../../../identity/users/domain/UserDoesNotExist";
+import { UserId } from "../../../../identity/users/domain/UserId";
+import { UserPlan } from "../../../../identity/users/domain/UserPlan";
+import { UserRepository } from "../../../../identity/users/domain/UserRepository";
 import { GooglePlaySubscriptionRepository } from "../../domain/GooglePlaySubscriptionRepository";
 
 /**
@@ -54,7 +54,8 @@ export class SyncUserPlanFromGooglePlay {
 
 		const plan = isActive ? UserPlan.Premium : UserPlan.Free;
 		user.setPlan(plan);
-		await this.userRepository.save(user);
+		const existing = await this.userRepository.searchByEmail(user.email.value);
+		await this.userRepository.save(user, existing?.passwordHash ?? "");
 
 		return { plan };
 	}

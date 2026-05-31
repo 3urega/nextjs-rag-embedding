@@ -2,17 +2,19 @@
 
 ```bash
 npm prep          # lint + build + test
-docker compose up # start database
+docker compose up -d   # Postgres + schema starter
 npm run dev       # local dev server (not Docker)
 npm run lint:fix
 npm run test
+npm run build:capacitor   # export out/ + cap sync android
 ```
 
 # Architecture
 
-- Next.js 16, Onion Architecture, DDD.
+- Next.js 14, Onion Architecture, DDD.
+- **Active contexts**: `identity` (users, auth), `billing` (Google Play), `shared` (infra, DI).
+- **Legacy reference**: `src/contexts/legacy/` (MOOC, Femturisme, RAG) — not wired in DI.
 - Frontend in `src/app/`, API routes in `src/app/api/`.
-- Backend in `src/contexts/`.
 
 # Documentation
 

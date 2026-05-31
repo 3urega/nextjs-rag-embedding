@@ -19,8 +19,10 @@
     "@capacitor/core": "^7.0.0",
     "@langchain/community": "^0.0.43",
     "@langchain/ollama": "^1.2.6",
+    "bcryptjs": "^2.4.3",
     "diod": "^3.0.0",
     "googleapis": "^126.0.1",
+    "jose": "^5.9.6",
     "langchain": "^0.1.31",
     "mariadb": "^3.2.3",
     "modelfusion": "^0.137.0",
@@ -36,6 +38,7 @@
   "devDependencies": {
     "@codelytv/primitives-type": "^1.0.5",
     "@faker-js/faker": "^8.3.1",
+    "@types/bcryptjs": "^2.4.6",
     "@types/jest": "^29.5.11",
     "@types/node": "^20",
     "@types/react": "^18",

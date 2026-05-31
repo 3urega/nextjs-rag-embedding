@@ -8,7 +8,7 @@ import { PostgresConnection } from "./PostgresConnection";
 
 @Service()
 export abstract class PostgresRepository<T extends AggregateRoot> {
-	private readonly sql: postgres.Sql;
+	protected readonly sql: postgres.Sql;
 
 	constructor(connection: PostgresConnection) {
 		this.sql = connection.sql;

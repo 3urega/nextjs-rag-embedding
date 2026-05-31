@@ -19,7 +19,7 @@ export class PostgresGooglePlaySubscriptionRepository implements GooglePlaySubsc
 	async searchByPurchaseToken(purchaseToken: string): Promise<GooglePlaySubscription | null> {
 		const result = await this.connection.sql`
 			SELECT purchase_token, user_id, product_id, expiry_time_ms, auto_renewing
-			FROM mooc.google_play_subscriptions
+			FROM starter.google_play_subscriptions
 			WHERE purchase_token = ${purchaseToken};
 		`;
 
@@ -29,7 +29,7 @@ export class PostgresGooglePlaySubscriptionRepository implements GooglePlaySubsc
 	async upsert(subscription: GooglePlaySubscription): Promise<void> {
 		const p = subscription.toPrimitives();
 		await this.connection.sql`
-			INSERT INTO mooc.google_play_subscriptions (
+			INSERT INTO starter.google_play_subscriptions (
 				purchase_token, user_id, product_id, expiry_time_ms, auto_renewing, updated_at
 			)
 			VALUES (
@@ -52,7 +52,7 @@ export class PostgresGooglePlaySubscriptionRepository implements GooglePlaySubsc
 	async searchLatestByUserId(userId: string): Promise<GooglePlaySubscription | null> {
 		const result = await this.connection.sql`
 			SELECT purchase_token, user_id, product_id, expiry_time_ms, auto_renewing
-			FROM mooc.google_play_subscriptions
+			FROM starter.google_play_subscriptions
 			WHERE user_id = ${userId}::uuid
 			ORDER BY expiry_time_ms DESC NULLS LAST
 			LIMIT 1;

@@ -1,9 +1,9 @@
 import { Service } from "diod";
 
 import { getSubscriptionPurchaseFromGooglePlay } from "../../../../../lib/billing/googlePlayAndroidPublisher";
-import { UserFinder } from "../../../../mooc/users/application/find/UserFinder";
-import { UserPlan } from "../../../../mooc/users/domain/UserPlan";
-import { UserRepository } from "../../../../mooc/users/domain/UserRepository";
+import { UserFinder } from "../../../../identity/users/application/find/UserFinder";
+import { UserPlan } from "../../../../identity/users/domain/UserPlan";
+import { UserRepository } from "../../../../identity/users/domain/UserRepository";
 import { GooglePlaySubscription } from "../../domain/GooglePlaySubscription";
 import { GooglePlaySubscriptionRepository } from "../../domain/GooglePlaySubscriptionRepository";
 import { PurchaseTokenAlreadyLinked } from "../../domain/PurchaseTokenAlreadyLinked";
@@ -60,7 +60,8 @@ export class VerifyGooglePlayPurchase {
 
 		const plan = isActive ? UserPlan.Premium : UserPlan.Free;
 		user.setPlan(plan);
-		await this.userRepository.save(user);
+		const credentials = await this.userRepository.searchByEmail(user.email.value);
+		await this.userRepository.save(user, credentials?.passwordHash ?? "");
 
 		return { plan };
 	}
